@@ -28,7 +28,7 @@ jobs:
         sonar-scanner \
           -Dsonar.projectKey=my-website-project \
           -Dsonar.organization=my-org \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \ 
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.sources=./ \
           -Dsonar.language=js,html,css \
@@ -36,3 +36,4 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+# Add the SonarToken and Sonar host URL of your own SonarQube instance in the repository secrets.
