@@ -1,0 +1,30 @@
+name: Trivy-Security-Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  trivy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up Trivy
+      uses: aquasecurity/trivy-action@v0.11.0
+      with:
+        scan-type: 'filesystem'
+        severity: 'HIGH,CRITICAL'
+        output: 'trivy-results.json'
+        format: 'json'
+
+    - name: Upload Trivy Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: trivy-results
+        path: trivy-results.json
