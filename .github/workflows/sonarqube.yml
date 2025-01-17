@@ -94,5 +94,5 @@ jobs:
           
     - name: Push Docker Image
       run: |
-        docker tag user-ui:${{ github.sha }} my-dockerhub-username/user-ui:v19
-        docker push my-dockerhub-aryanatel/user-ui:v19
+        docker tag user-ui:${{ github.sha }} aryanatel/user-ui:v19
+        docker push aryanatel/user-ui:v19
