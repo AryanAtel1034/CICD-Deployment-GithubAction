@@ -91,8 +91,9 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-          
-    - name: Push Docker Image
+
+    - name: Build and Push Admin UI image
       run: |
-        docker tag my-app:${{ github.sha }} my-docker-repo/my-app:${{ github.sha }}
-        docker push my-docker-repo/my-app:${{ github.sha }}
+        echo "Building and pushing Admin UI image"
+        docker tag user-ui ${{ vars.DOCKER_USERNAME }}/user-ui:v${{github.run_number}}
+        docker push ${{ vars.DOCKER_USERNAME }}/user-ui:v${{github.run_number}}
