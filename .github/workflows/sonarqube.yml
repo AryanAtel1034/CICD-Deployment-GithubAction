@@ -1,4 +1,4 @@
-name: SonarQube Scan
+name: Code and Security Scan
 
 on:
   push:
@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  sonarqube:
+  code-scan:
+    name: SonarQube Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +29,7 @@ jobs:
         sonar-scanner \
           -Dsonar.projectKey=my-website-project \
           -Dsonar.organization=my-org \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \ 
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.sources=./ \
           -Dsonar.language=js,html,css \
@@ -36,4 +37,25 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-# Add the SonarToken and Sonar host URL of your own SonarQube instance in the repository secrets.
+
+  security-scan:
+    name: Trivy Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up Trivy
+      uses: aquasecurity/trivy-action@v0.28.0
+      with:
+        scan-type: 'filesystem' # Scans the repository code
+        severity: 'HIGH,CRITICAL'
+        output: 'trivy-results.json'
+        format: 'json'
+
+    - name: Upload Trivy Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: trivy-results
+        path: trivy-results.json
