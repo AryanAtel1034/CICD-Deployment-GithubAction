@@ -79,7 +79,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t my-app:${{ github.sha }} .
+        docker build -t user-ui:${{ github.sha }} .
 
     - name: Run Trivy vulnerability scanner on Docker image
       uses: aquasecurity/trivy-action@0.28.0
@@ -94,5 +94,5 @@ jobs:
           
     - name: Push Docker Image
       run: |
-        docker tag user-ui:${{ github.sha }} aryanatel/user-ui:v19
+        docker tag user-ui:${{ github.run_number }}aryanatel/user-ui:v19
         docker push aryanatel/user-ui:v19
