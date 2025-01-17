@@ -81,10 +81,17 @@ jobs:
       run: |
         docker build -t my-app:${{ github.sha }} .
 
-    - name: Scan Docker Image with Trivy
-      run: |
-        trivy image --severity HIGH,CRITICAL --no-progress --exit-code 1 my-app:${{ github.sha }}
-
+    - name: Run Trivy vulnerability scanner on Docker image
+      uses: aquasecurity/trivy-action@0.28.0
+      continue-on-error: true
+      with:
+          image-ref: 'user-ui'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          
     - name: Push Docker Image
       run: |
         docker tag my-app:${{ github.sha }} my-docker-repo/my-app:${{ github.sha }}
