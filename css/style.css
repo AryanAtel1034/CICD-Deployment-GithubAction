@@ -218,7 +218,9 @@ h6,
         url(../img/blob-bottom-left.png),
         url(../img/blob-bottom-right.png),
         url(../img/blob-center.png),
-        url(../img/bg-bottom.png);
+        url(../img/bg-bottom.png),
+        url(../img/map.png);
+        
     background-position:
         left 0px top 0px,
         right 0px top 0px,
