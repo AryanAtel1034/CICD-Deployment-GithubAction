@@ -103,7 +103,7 @@ jobs:
 # Teraform Infrastructure Deployment
 
   terraform-infra:
-    name: Terraform Infrastructure Management
+    name: Set Up AWS Infrastructure with Terraform
     runs-on: ubuntu-latest
 
     steps:
@@ -132,21 +132,9 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
 
     - name: Apply Terraform Deployment
-      if: github.event.inputs.action == 'apply'
       run: terraform apply -auto-approve tfplan
       working-directory: ./terraform
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
-
-    - name: Destroy Terraform Infrastructure
-      if: github.event.inputs.action == 'destroy'
-      run: terraform destroy -auto-approve
-      working-directory: ./terraform
-      env:
-        hello
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-
