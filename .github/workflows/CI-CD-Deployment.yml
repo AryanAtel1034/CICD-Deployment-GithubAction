@@ -100,41 +100,41 @@ jobs:
         docker tag user-ui:${{ github.run_number }} aryanatel/user-ui:v19
         docker push aryanatel/user-ui:v19
 
-# # Teraform Infrastructure Deployment
+# Teraform Infrastructure Deployment
 
-#   terraform-infra:
-#     name: Set Up AWS Infrastructure with Terraform
-#     runs-on: ubuntu-latest
+  terraform-infra:
+    name: Set Up AWS Infrastructure with Terraform
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout Code
-#       uses: actions/checkout@v2
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
 
-#     - name: Set up Terraform
-#       uses: hashicorp/setup-terraform@v2
-#       with:
-#         terraform_version: 1.5.0
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
 
-#     - name: Initialize Terraform
-#       run: terraform init
-#       working-directory: ./terraform
+    - name: Initialize Terraform
+      run: terraform init
+      working-directory: ./terraform
 
-#     - name: Validate Terraform Configuration
-#       run: terraform validate
-#       working-directory: ./terraform
+    - name: Validate Terraform Configuration
+      run: terraform validate
+      working-directory: ./terraform
 
-#     - name: Plan Terraform Deployment
-#       run: terraform plan -out=tfplan
-#       working-directory: ./terraform
-#       env:
-#         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#         AWS_REGION: ${{ secrets.AWS_REGION }}
+    - name: Plan Terraform Deployment
+      run: terraform plan -out=tfplan
+      working-directory: ./terraform
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
 
-#     - name: Apply Terraform Deployment
-#       run: terraform apply -auto-approve tfplan
-#       working-directory: ./terraform
-#       env:
-#         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#         AWS_REGION: ${{ secrets.AWS_REGION }}
+    - name: Apply Terraform Deployment
+      run: terraform apply -auto-approve tfplan
+      working-directory: ./terraform
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
