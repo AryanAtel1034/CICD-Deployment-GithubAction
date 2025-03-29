@@ -100,9 +100,9 @@ jobs:
         docker tag user-ui:${{ github.run_number }} aryanatel/user-ui:v19
         docker push aryanatel/user-ui:v19
 
-# Teraform Infrastructure Deployment
+# Teraform Infrastructure Deployment testing
 
-  # terraform-infra:
+# terraform-infra:
 #     name: Set Up AWS Infrastructure with Terraform
 #     runs-on: ubuntu-latest
 
