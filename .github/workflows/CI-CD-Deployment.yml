@@ -3,7 +3,7 @@ name: Code and Security Scan
 on:
   push:
     branches: [ "main" ]
-    tags: [ "infra-*" ] # on infra-$Anything only
+    tags: [ "infra-*" ] # on infra-Anything only
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
