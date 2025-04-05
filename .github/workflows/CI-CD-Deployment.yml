@@ -44,6 +44,7 @@ jobs:
 # Trivy Security Scaning Part
   security-scan:
     name: Trivy File Scan
+    needs: code-scan  # Wait for Docker image build
     runs-on: ubuntu-latest
 
     steps:
