@@ -68,6 +68,7 @@ jobs:
 # Docker Image Build and Push 
   build-push:
     name: Build and Push Docker Image
+    needs: security-scan
     runs-on: ubuntu-latest
 
     steps:
