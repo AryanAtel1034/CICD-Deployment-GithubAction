@@ -3,7 +3,7 @@ name: Code and Security Scan
 on:
   push:
     branches: [ "main" ]
-    tags: [ "infra-*" ] # on infra-Anything only
+    tags: [ "infra-" ] # on infra-Anything only
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -127,22 +127,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Validate Terraform
-        run: terraform validate
-        working-directory: ./terraform
-
-      - name: Plan Infrastructure
-        run: terraform plan -out=tfplan
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
         working-directory: ./terraform
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-
-      - name: Apply Infrastructure
-        run: terraform apply -auto-approve tfplan
-        working-directory: ./terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION: ${{ secrets.AWS_REGION }}
