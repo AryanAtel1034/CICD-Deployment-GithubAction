@@ -1,14 +1,16 @@
 # Use the official nginx base image
-FROM nginx:latest
+FROM nginx:alpine
 
 # Set the working directory
-WORKDIR /usr/share/nginx/html
+WORKDIR /app
 
 # Copy all files from your repository to the nginx web directory
-COPY . .
+COPY . /usr/share/nginx/html
 
 # Expose port 80 for the container
 EXPOSE 80
 
-# Start nginx when the container launches
-CMD ["nginx", "-g", "daemon off;"]
+
+
+
+
