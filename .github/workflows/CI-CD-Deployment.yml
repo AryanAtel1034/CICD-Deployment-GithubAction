@@ -7,102 +7,118 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
 
 
 # SonarQube Scaning Part
 jobs:
-  code-scan:
-    name: SonarQube Scan
-    runs-on: ubuntu-latest
+  # code-scan:
+  #   name: SonarQube Scan
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout Code
+  #     uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v3
+  #     with:
+  #       node-version: '16'
 
-    - name: Install Sonar Scanner
-      run: npm install -g sonar-scanner
+  #   - name: Install Sonar Scanner
+  #     run: npm install -g sonar-scanner
 
-    - name: Run SonarQube Scan
-      run: |
-        sonar-scanner \
-          -Dsonar.projectKey=my-website-project \
-          -Dsonar.organization=my-org \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-          -Dsonar.sources=./ \
-          -Dsonar.language=js,html,css \
-          -Dsonar.sourceEncoding=UTF-8
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  #   - name: Run SonarQube Scan
+  #     run: |
+  #       sonar-scanner \
+  #         -Dsonar.projectKey=my-website-project \
+  #         -Dsonar.organization=my-org \
+  #         -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+  #         -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+  #         -Dsonar.sources=./ \
+  #         -Dsonar.language=js,html,css \
+  #         -Dsonar.sourceEncoding=UTF-8
+  #     env:
+  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
 # Trivy Security Scaning Part
-  security-scan:
-    name: Trivy File Scan
-    needs: code-scan  # Wait for Docker image build
-    runs-on: ubuntu-latest
+  # security-scan:
+  #   name: Trivy File Scan
+  #   needs: code-scan  # Wait for Docker image build
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout Code
+  #     uses: actions/checkout@v4
 
-    - name: Set up Trivy
-      uses: aquasecurity/trivy-action@0.28.0
-      with:
-        scan-type: 'filesystem'
-        severity: 'HIGH,CRITICAL'
-        output: 'trivy-results.json'
-        format: 'json'
+  #   - name: Set up Trivy
+  #     uses: aquasecurity/trivy-action@0.28.0
+  #     with:
+  #       scan-type: 'filesystem'
+  #       severity: 'HIGH,CRITICAL'
+  #       output: 'trivy-results.json'
+  #       format: 'json'
 
-    - name: Upload Trivy Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: trivy-results
-        path: trivy-results.json
+  #   - name: Upload Trivy Report
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: trivy-results
+  #       path: trivy-results.json
 
 # Docker Image Build and Push 
   build-push:
-    name: Build and Push Docker Image
-    needs: security-scan
-    runs-on: ubuntu-latest
+  name: Build and Push Docker Image
+  needs: security-scan
+  runs-on: ubuntu-latest
 
-    steps:
+  steps:
     - name: Checkout Code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@v3
 
-    - name: Log in to DockerHub
-      uses: docker/login-action@v2
+    # Configure AWS Credentials using GitHub OIDC
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        role-to-assume: arn:aws:iam::194477973016:role/OIDC_Role
+        aws-region: ap-south-1
 
+    # Login to Amazon ECR
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # Build Docker Image
     - name: Build Docker Image
       run: |
-         docker build -t user-ui:${{ github.run_number }} .
+        docker build -t user-ui:${{ github.run_number }} .
 
-    - name: Run Trivy vulnerability scanner on Docker image
+    # Scan Image using Trivy
+    - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@0.28.0
       continue-on-error: true
       with:
-          image-ref: 'user-ui'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          
-    - name: Push Docker Image
+        image-ref: user-ui:${{ github.run_number }}
+        format: table
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: os,library
+        severity: CRITICAL,HIGH
+
+    # Tag and Push Image to ECR
+    - name: Tag and Push Docker Image to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: dev-core-service
+        IMAGE_TAG: ${{ github.run_number }}
       run: |
-        docker tag user-ui:${{ github.run_number }} aryanatel/user-ui:v19
-        docker push aryanatel/user-ui:v19
+        docker tag user-ui:${IMAGE_TAG} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
 # #Teraform Infrastructure Deployment testing
 
