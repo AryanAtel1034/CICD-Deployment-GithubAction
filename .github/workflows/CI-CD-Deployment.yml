@@ -69,56 +69,51 @@ jobs:
   #       path: trivy-results.json
 
 # Docker Image Build and Push 
+  jobs:
   build-push:
-  name: Build and Push Docker Image
-  needs: security-scan
-  runs-on: ubuntu-latest
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    # Configure AWS Credentials using GitHub OIDC
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::194477973016:role/OIDC_Role
-        aws-region: ap-south-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::194477973016:role/OIDC_Role
+          aws-region: ap-south-1
 
-    # Login to Amazon ECR
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-    # Build Docker Image
-    - name: Build Docker Image
-      run: |
-        docker build -t user-ui:${{ github.run_number }} .
+      - name: Build Docker Image
+        run: |
+          docker build -t user-ui:${{ github.run_number }} .
 
-    # Scan Image using Trivy
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.28.0
-      continue-on-error: true
-      with:
-        image-ref: user-ui:${{ github.run_number }}
-        format: table
-        exit-code: '1'
-        ignore-unfixed: true
-        vuln-type: os,library
-        severity: CRITICAL,HIGH
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        continue-on-error: true
+        with:
+          image-ref: user-ui:${{ github.run_number }}
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
 
-    # Tag and Push Image to ECR
-    - name: Tag and Push Docker Image to ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: dev-core-service
-        IMAGE_TAG: ${{ github.run_number }}
-      run: |
-        docker tag user-ui:${IMAGE_TAG} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      - name: Tag and Push Docker Image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: dev-core-service
+          IMAGE_TAG: ${{ github.run_number }}
+        run: |
+          docker tag user-ui:${IMAGE_TAG} $ECR_REGISTRY/$ECR_REPOSITORY:${IMAGE_TAG}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${IMAGE_TAG}
 
 # #Teraform Infrastructure Deployment testing
 
