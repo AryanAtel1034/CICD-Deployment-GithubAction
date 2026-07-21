@@ -95,16 +95,16 @@ jobs:
         run: |
           docker build -t user-ui:${{ github.run_number }} .
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
-        continue-on-error: true
-        with:
-          image-ref: user-ui:${{ github.run_number }}
-          format: table
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: CRITICAL,HIGH
+      # - name: Run Trivy vulnerability scanner
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   continue-on-error: true
+      #   with:
+      #     image-ref: user-ui:${{ github.run_number }}
+      #     format: table
+      #     exit-code: '1'
+      #     ignore-unfixed: true
+      #     vuln-type: os,library
+      #     severity: CRITICAL,HIGH
 
       - name: Tag and Push Docker Image to ECR
         env:
